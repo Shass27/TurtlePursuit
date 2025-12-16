@@ -24,7 +24,8 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            "controller = catch_all.turtle_controller:main"
+            "controller = catch_all.turtle_controller:main",
+            "spawner = catch_all.turtle_spawner:main"
         ],
     },
 )

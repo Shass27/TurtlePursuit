@@ -1,0 +1,52 @@
+#!/usr/bin/env python3
+import rclpy
+from rclpy.node import Node
+from turtlesim.srv import Spawn
+from functools import partial
+import random
+import math
+
+class TurtleSpawnerNode(Node):
+    def __init__(self):
+        super().__init__("turtle_spawner")
+        self.counter = 2
+        self.spawn_client = self.create_client(Spawn, "/spawn")
+        self.spawn_timer = self.create_timer(2, self.spawn)
+
+    def spawn(self):
+        name = "turtle" + str(self.counter)
+        self.counter+=1
+        x=random.uniform(0,11)
+        y=random.uniform(0,11)
+        theta=random.uniform(0, 2*math.pi)
+        self.call_spawn_service(name, x, y, theta)
+
+    def call_spawn_service(self, turtle_name, x, y, theta):
+        while not self.spawn_client.wait_for_service(1.0):
+            self.get_logger().warn("Waiting for /spawn service")
+        
+        request = Spawn.Request()
+        request.x = x
+        request.y = y
+        request.theta = theta
+        request.name = turtle_name
+
+        future = self.spawn_client.call_async(request)
+        future.add_done_callback(partial(self.callback_spawn, request=request))
+
+    def callback_spawn(self, future, request):
+        response: Spawn.Response = future.result()
+        if response.name != "":
+            self.get_logger().info("New alive turtle: " + response.name)
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = TurtleSpawnerNode()
+
+    rclpy.spin(node)
+    rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
