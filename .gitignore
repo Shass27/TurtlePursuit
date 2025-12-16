@@ -1,0 +1,20 @@
+# ROS2 build artifacts
+build/
+install/
+log/
+
+# VSCode junk
+.vscode/
+*.code-workspace
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Colcon 
+.colcon/
+
+# Ignore any build outputs inside packages
+**/build/
+**/install/
+**/log/
