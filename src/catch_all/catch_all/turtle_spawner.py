@@ -47,6 +47,7 @@ class TurtleSpawnerNode(Node):
             new_turtle.x = request.x
             new_turtle.y = request.y
             new_turtle.theta = request.theta
+            new_turtle.name = response.name
             self.TurtleList.append(new_turtle)
             msg = Turtlearray()
             msg.turtles = self.TurtleList
