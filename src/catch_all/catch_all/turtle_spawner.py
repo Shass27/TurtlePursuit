@@ -15,7 +15,7 @@ class TurtleSpawnerNode(Node):
         self.spawn_client = self.create_client(Spawn, "/spawn")
         self.spawn_list_pub = self.create_publisher(Turtlearray, "turtles", 10)
         self.TurtleList = []
-        self.spawn_timer = self.create_timer(2, self.spawn)
+        self.spawn_timer = self.create_timer(1, self.spawn)
 
     def spawn(self):
         name = "turtle" + str(self.counter)

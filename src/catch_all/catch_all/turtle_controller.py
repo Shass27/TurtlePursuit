@@ -20,15 +20,15 @@ class TurtleControllerNode(Node):
         self.kill_client = self.create_client(Kill, "/kill")
         while not self.kill_client.wait_for_service(1):
             self.get_logger().warn("Waiting for /kill service")
-        self.turt_counter = 0
+        self.turtle_list = []
+        self.dead_turtle_list=[]
         self.control_loop_timer_ = self.create_timer(0.01, self.control_loop)
 
     def callback_pose(self, pose: Pose):
         self.pose_ = pose
 
     def callback_turtle_no(self, msg: Turtlearray):
-        if len(msg.turtles)>0 and self.turt_counter<len(msg.turtles):
-            self.turtle_to_catch = msg.turtles[self.turt_counter]
+            self.turtle_list = msg.turtles
 
     def call_to_kill(self, name):
         request = Kill.Request()
@@ -44,6 +44,23 @@ class TurtleControllerNode(Node):
             self.get_logger().error("Failed to kill "+name)
 
     def control_loop(self):
+
+        self.turtle_to_catch = None
+        closest_distance = None
+
+        for turtle in self.turtle_list:
+            dxt = turtle.x - self.pose_.x
+            dyt = turtle.y - self.pose_.y
+            distance = math.sqrt(dxt**2 + dyt**2)
+            if turtle not in self.dead_turtle_list:
+                if closest_distance==None:
+                    closest_distance = distance
+                    self.turtle_to_catch = turtle
+                else:
+                    if distance < closest_distance:
+                        closest_distance = distance
+                        self.turtle_to_catch = turtle
+
         if self.pose_ == None or self.turtle_to_catch == None:
             return
         
@@ -70,9 +87,8 @@ class TurtleControllerNode(Node):
             cmd.linear.x = 0.0
             cmd.angular.z = 0.0
             self.call_to_kill(self.turtle_to_catch.name)
-            self.turt_counter+=1
+            self.dead_turtle_list.append(self.turtle_to_catch)
             self.get_logger().info(self.turtle_to_catch.name + " has been chased")
-            self.turtle_to_catch=None
 
         self.vel_pub.publish(cmd)
 
