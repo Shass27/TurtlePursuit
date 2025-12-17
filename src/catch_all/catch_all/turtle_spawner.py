@@ -12,13 +12,17 @@ class TurtleSpawnerNode(Node):
     def __init__(self):
         super().__init__("turtle_spawner")
         self.counter = 2
+        self.declare_parameter("prefix", "turtle")
+        self.turtle_prefix = self.get_parameter("prefix").value
         self.spawn_client = self.create_client(Spawn, "/spawn")
         self.spawn_list_pub = self.create_publisher(Turtlearray, "turtles", 10)
         self.TurtleList = []
-        self.spawn_timer = self.create_timer(1, self.spawn)
+        self.declare_parameter("freq", 1.0)
+        self.spawn_freq = self.get_parameter("freq").value
+        self.spawn_timer = self.create_timer(self.spawn_freq, self.spawn)
 
     def spawn(self):
-        name = "turtle" + str(self.counter)
+        name = self.turtle_prefix + str(self.counter)
         self.counter+=1
         x=random.uniform(0,11)
         y=random.uniform(0,11)

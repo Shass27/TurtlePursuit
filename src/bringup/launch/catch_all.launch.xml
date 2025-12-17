@@ -1,0 +1,7 @@
+<launch>
+    <node pkg="turtlesim" exec="turtlesim_node" />
+    <node pkg="catch_all" exec="controller"/>
+    <node pkg="catch_all" exec="spawner">
+        <param from="$(find-pkg-share bringup)/config/catch_all_config.yaml"/>
+    </node>
+</launch>
