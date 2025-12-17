@@ -5,12 +5,16 @@ from turtlesim.srv import Spawn
 from functools import partial
 import random
 import math
+from interfaces.msg import Turtle
+from interfaces.msg import Turtlearray
 
 class TurtleSpawnerNode(Node):
     def __init__(self):
         super().__init__("turtle_spawner")
         self.counter = 2
         self.spawn_client = self.create_client(Spawn, "/spawn")
+        self.spawn_list_pub = self.create_publisher(Turtlearray, "turtles", 10)
+        self.TurtleList = []
         self.spawn_timer = self.create_timer(2, self.spawn)
 
     def spawn(self):
@@ -38,6 +42,15 @@ class TurtleSpawnerNode(Node):
         response: Spawn.Response = future.result()
         if response.name != "":
             self.get_logger().info("New alive turtle: " + response.name)
+
+            new_turtle = Turtle()
+            new_turtle.x = request.x
+            new_turtle.y = request.y
+            new_turtle.theta = request.theta
+            self.TurtleList.append(new_turtle)
+            msg = Turtlearray()
+            msg.turtles = self.TurtleList
+            self.spawn_list_pub.publish(msg)
 
 
 def main(args=None):
